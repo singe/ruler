@@ -39,7 +39,7 @@ var stopSuccess = false
 var proxyURL string
 var user_as_pass = true
 
-func autodiscoverDomain(domain string) string {
+func autodiscoverDomain(domain string, proxyURL string) string {
 	var autodiscoverURL string
 
 	//check if this is just a domain or a redirect (starts with http[s]://)
@@ -80,6 +80,7 @@ func autodiscoverDomain(domain string) string {
 	}
 
 	if proxyURL != "" {
+		utils.Trace.Printf("Proxy %s\n", proxyURL)
 		proxy, err := url.Parse(proxyURL)
 		if err != nil {
 			return ""
@@ -96,7 +97,7 @@ func autodiscoverDomain(domain string) string {
 	if err != nil {
 		if autodiscoverStep < 2 {
 			autodiscoverStep++
-			return autodiscoverDomain(domain)
+			return autodiscoverDomain(domain, proxyURL)
 		}
 		return ""
 	}
@@ -107,14 +108,14 @@ func autodiscoverDomain(domain string) string {
 	}
 	if autodiscoverStep < 2 {
 		autodiscoverStep++
-		return autodiscoverDomain(domain)
+		return autodiscoverDomain(domain, proxyURL)
 	}
 	return ""
 }
 
 //Init function to setup the brute-force session
 func Init(domain, usersFile, passwordsFile, userpassFile, pURL string, b, i, s, v bool, c, d, t int) error {
-	autodiscoverURL = autodiscoverDomain(domain)
+	autodiscoverURL = autodiscoverDomain(domain, pURL)
 
 	if autodiscoverURL == "" {
 		return fmt.Errorf("No autodiscover end-point found")
